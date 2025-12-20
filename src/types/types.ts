@@ -1,51 +1,41 @@
-// Почему
-export type sum = (a: number, b: number) => number
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH';
 
-// TODO поинтересоваться насчёт exportа выше 
-// обьект валидации
-export type CreateFormValidator = (form: HTMLFormElement) => FormValidator;
-
-// основа для библиотеки
-export interface FormValidator {
-  field: (fieldName: string) => FieldValidator;
-  validate: () => boolean;
-  errors: Record<string, string>;
-  setError: (fieldName: string, message: string) => void;
-  clearErrors: () => void;
+// Сам запрос
+export interface HttpClientConfig {
+  baseURL: string;
+  retries: number;
+  retryDelay: number;
+  headers: Record<string, string>;
+  timeout: number;
 }
 
-// какие впринципе данные будут валидироваться в поле
-// TODO уточнить только строки, числа и массивы?
-export interface FieldValidator {
-  string: () => StringFieldValidator;
-  number: () => NumberFieldValidator;
-  array: () => ArrayFieldValidator;
+// 
+export interface RequestOptions {
+  headers: Record<string, string>;
+  retries: number;
+  params: Record<string, string | number>;
+  timeout: number;
 }
 
-// Строки
+/** Типизация ошибок HTTP */
 
-export interface StringFieldValidator {
-  min: (len: number, message?: string) => StringFieldValidator;
-  max: (len: number, message?: string) => StringFieldValidator;
-  email: (message?: string) => StringFieldValidator;
-  required: (message?: string) => StringFieldValidator;
-  pattern: (regex: RegExp, message?: string) => StringFieldValidator;
+export class HttpError extends Error {
+  constructor(
+    public status: number,
+    public statusText: string,
+    public response?: any,
+    public url?: string
+  ) {
+    super(`HTTP ${status}: ${statusText}`);
+    this.name = 'HttpError';
+  }
+
+  /** Ошибки по кодам 400 и 500 */
+  isClientError(): boolean {
+    return this.status >= 400 && this.status < 500;
+  }
+
+  isServerError(): boolean {
+    return this.status >= 500 && this.status < 600;
+  }
 }
-
-// Числа
-
-export interface NumberFieldValidator {
-  min: (val: number, message?: string) => NumberFieldValidator;
-  max: (val: number, message?: string) => NumberFieldValidator;
-  integer: (message?: string) => NumberFieldValidator;
-  required: (message?: string) => NumberFieldValidator;
-}
-
-// Массивы
-
-export interface ArrayFieldValidator {
-  min: (len: number, message?: string) => ArrayFieldValidator;
-  max: (len: number, message?: string) => ArrayFieldValidator;
-  required: (message?: string) => ArrayFieldValidator;
-}
-
