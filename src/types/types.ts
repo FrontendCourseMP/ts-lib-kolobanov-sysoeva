@@ -12,30 +12,21 @@ export interface HttpClientConfig {
 // 
 export interface RequestOptions {
   headers: Record<string, string>;
-  retries: number;
   params: Record<string, string | number>;
-  timeout: number;
 }
 
 /** Типизация ошибок HTTP */
 
 export class HttpError extends Error {
-  constructor(
-    public status: number,
-    public statusText: string,
-    public response?: any,
-    public url?: string
-  ) {
-    super(`HTTP ${status}: ${statusText}`);
+  status: number;
+  statusText: string;
+  url: string;
+
+  constructor(status: number, statusText: string, url: string) {
+    super(`Request failed with status ${status}: ${statusText}`);
     this.name = 'HttpError';
-  }
-
-  /** Ошибки по кодам 400 и 500 */
-  isClientError(): boolean {
-    return this.status >= 400 && this.status < 500;
-  }
-
-  isServerError(): boolean {
-    return this.status >= 500 && this.status < 600;
+    this.status = status;
+    this.statusText = statusText;
+    this.url = url;
   }
 }
