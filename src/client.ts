@@ -14,7 +14,7 @@ export class HttpClient {
     timeout: number;
   };
 
-  constructor(userConfig: HttpClientConfig = {}) {
+  constructor(userConfig: Partial<HttpClientConfig>) {
     this.config = {
       baseURL: userConfig.baseURL?.replace(/\/+$/, '') || '',
       retries: userConfig.retries ?? 0,
@@ -97,8 +97,6 @@ export class HttpClient {
 
     throw lastError;
   }
-
-  // --- Public API ---
 
   get<T = any>(url: string, options?: Omit<RequestOptions, 'body'>): Promise<T> {
     return this.request<T>('GET', url, options);
